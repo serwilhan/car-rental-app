@@ -5,11 +5,27 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT;
 
+const pool = require('./db');
+
 // app.use(cors());
 app.use(express.json());
 
-app.post('/user', (req, res) => {
-  console.log(req.body);
+// ROUTES
+app.post('/members', async (req, res) => {
+  // try {
+  // } catch (error) {
+  //   console.error(error.message);
+  // }
+  const { email, password } = req.body;
+  const newMember = await pool.query(`INSERT INTO members (email, password) VALUES($1, $2) RETURNING *`, [email, password]);
+
+  res.json(newMember.rows[0]);
+});
+
+app.get('/members', async (req, res) => {
+  const allMembers = await pool.query('SELECT * FROM members');
+
+  res.json(allMembers.rows);
 });
 
 app.listen(PORT, () => {
